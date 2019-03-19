@@ -1,6 +1,6 @@
 {
-  "name": "react-emoji-render",
-  "version": "0.6.0",
+  "name": "react-emoji-render-fix",
+  "version": "0.6.1",
   "author": "Tom Moor",
   "description": "Render emoji's the way your users expect.",
   "main": "lib/index.js",
@@ -50,6 +50,7 @@
     "classnames": "^2.2.5",
     "emoji-regex": "^6.4.1",
     "lodash.flatten": "^4.4.0",
+    "memoize-one": "^5.0.0",
     "prop-types": "^15.5.8",
     "string-replace-to-array": "^1.0.1"
   },

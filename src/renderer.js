@@ -8,6 +8,7 @@ import normalizeProtocol from "./normalizeProtocol";
 import unicodeToCodepoint from "./unicodeToCodepoint";
 import aliases from "../data/aliases";
 import asciiAliases from "../data/asciiAliases";
+import memoize from 'memoize-one';
 
 const asciiAliasesRegex = asciiRegex();
 const unicodeEmojiRegex = emojiRegex();
@@ -81,38 +82,44 @@ export function toArray(text, options = {}) {
     return aliases[match[1]] || match[0];
   }
 
-  return replace(
+  const array = replace(
     text
       .replace(asciiAliasesRegex, replaceAsciiAliases)
       .replace(aliasesRegex, replaceAliases),
     unicodeEmojiRegex,
     replaceUnicodeEmoji
   );
+
+  return array.filter(e => !(typeof e === "string" && e === "️"));
 }
 
-export default function Emoji(
-  { text, onlyEmojiClassName, options = {}, className, ...rest }
-) {
-  function isOnlyEmoji(output) {
-    if (output.length > 3) return false;
+function isOnlyEmoji(output) {
+  if (output.length > 3) return false;
 
-    for (let i = 0; i < output.length; i++) {
-      if (typeof output[i] === "string") return false;
-    }
-
-    return true;
+  for (let i = 0; i < output.length; i++) {
+    if (typeof output[i] === "string") return false;
   }
 
-  const output = toArray(text, options);
-  const classes = classnames(className, {
-    [onlyEmojiClassName]: isOnlyEmoji(output)
-  });
+  return true;
+}
 
-  return (
-    <span {...rest} className={classes}>
-      {output}
-    </span>
-  );
+export default class Emoji extends React.Component {
+
+  memoizeToArray = memoize(toArray);
+
+  render() {
+    const { text, onlyEmojiClassName, options = {}, className, ...rest } = this.props;
+    const output = this.memoizeToArray(text, options);
+    const classes = classnames(className, {
+      [onlyEmojiClassName]: isOnlyEmoji(output)
+    });
+  
+    return (
+      <span {...rest} className={classes}>
+        {output}
+      </span>
+    );
+  }
 }
 
 Emoji.propTypes = {
